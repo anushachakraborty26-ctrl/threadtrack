@@ -216,3 +216,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ThreadTrack-specific
+# Source PDFs are large (~50MB total) and may have copyright restrictions.
+# Listed in docs/sources/README.md instead so anyone can reproduce.
+docs/sources/*.pdf
+
+# macOS junk
+.DS_Store
+
