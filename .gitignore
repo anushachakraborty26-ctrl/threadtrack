@@ -221,6 +221,8 @@ __marimo__/
 # Source PDFs are large (~50MB total) and may have copyright restrictions.
 # Listed in docs/sources/README.md instead so anyone can reproduce.
 docs/sources/*.pdf
+# Text extractions of source PDFs (same copyright concerns; for local search only)
+docs/sources/*.txt
 
 # macOS junk
 .DS_Store
