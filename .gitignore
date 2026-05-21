@@ -230,3 +230,6 @@ docs/sources/*.txt
 # Process-doc builder dependencies (the build.js script itself is kept)
 docs/process_doc/node_modules/
 
+# Test-run sample from src/classify_reviews.py (regenerable; not a deliverable)
+data/classified_reviews_SAMPLE.csv
+
