@@ -87,7 +87,7 @@ body.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 
 body.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 },
   children: [new TextRun({ text: 'National Institute of Fashion Technology', size: 22, color: '666666' })] }));
 body.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 600 },
-  children: [new TextRun({ text: 'Covering 19-21 May 2026 — Phases 1 to 4 complete', size: 22, color: '666666' })] }));
+  children: [new TextRun({ text: 'Covering 19-21 May 2026 — Phases 1 to 5 complete', size: 22, color: '666666' })] }));
 body.push(new Paragraph({ alignment: AlignmentType.CENTER,
   children: [new TextRun({ text: 'This document is written so a reader with no prior knowledge of supply chains, data analysis,', size: 20, color: '888888' })] }));
 body.push(new Paragraph({ alignment: AlignmentType.CENTER,
@@ -144,7 +144,7 @@ body.push(bullet('For every prediction, it produces a written list of the specif
 body.push(h2('2.3 What ThreadTrack is not'));
 body.push(p('Honesty about scope is part of good engineering. ThreadTrack is a portfolio project, and several things about it are deliberately limited.'));
 body.push(bullet('It does not use a real company’s private order data. No such data is publicly available. Instead it uses a synthetic (artificially generated) dataset, carefully calibrated so its statistical patterns match real, cited industry figures. Section 4 explains this choice in full.'));
-body.push(bullet('It is not, at the time of writing, a finished deployed product. It is being built in phases, and this document covers the first four of six planned phases.'));
+body.push(bullet('It is not, at the time of writing, a finished deployed product. It is being built in phases, and this document covers the first five of six planned phases.'));
 body.push(bullet('It does not claim perfect accuracy. As later sections show in detail, one of its two predictions works very well and the other is genuinely difficult, and the project says so plainly rather than hiding it.'));
 body.push(pageBreak());
 
@@ -169,8 +169,8 @@ body.push(bullet('Cited industry research is gathered and distilled into a singl
 body.push(bullet('Those numbers are used to generate a synthetic dataset of purchase orders whose statistical behaviour mirrors reality.'));
 body.push(bullet('The hand-built rule-based scorer reads each order and produces transparent risk scores.'));
 body.push(bullet('The machine learning model reads the same orders and produces its own, pattern-learned risk estimates.'));
-body.push(bullet('The two are blended into a hybrid score — the planned next step at the time of writing.'));
-body.push(bullet('A language-model layer (planned) will read unstructured customer reviews and extract supply chain complaints, providing an independent real-world check.'));
+body.push(bullet('The two are blended into a single hybrid score.'));
+body.push(bullet('A language-model layer reads unstructured customer reviews and extracts supply chain complaints, providing an independent real-world check.'));
 body.push(bullet('Finally, an output layer (planned) will present everything through a spreadsheet tool, an interactive dashboard, and a written case study.'));
 
 body.push(h2('4.2 The data layer, and why the data is synthetic'));
@@ -183,8 +183,8 @@ body.push(p([b('Tier one is the rule-based scorer. '), t('This is a system of ha
 body.push(p([b('Tier two is the machine learning model. '), t('This is an algorithm that examines thousands of past orders and finds patterns on its own. Its strength is that it can discover subtle combinations of factors a human would never think to write down. Its weakness is that it is a "black box": it is hard to explain why it made any single prediction.')]));
 body.push(p('Used together, the two cover each other’s weaknesses. When both agree that an order is risky, confidence is high. When they disagree, the order is flagged for a human to look at closely. This rules-plus-learning combination is how serious real-world decision systems are actually built; it is not a student simplification.'));
 
-body.push(h2('4.4 The planned language-model layer'));
-body.push(p('A later phase will add a third source of insight. Customer reviews are written in ordinary language and contain supply chain signals that no neat data column captures: "it arrived too late," "the fabric felt cheap," "the size was wrong." A large language model will read these reviews automatically and convert them into structured categories. As Section 6 explains, the machine learning results made the value of this layer clearer: returns proved hard to predict from order data alone, and customer text is precisely the missing source of signal.'));
+body.push(h2('4.4 The language-model layer'));
+body.push(p('A third source of insight is now built. Customer reviews are written in ordinary language and contain supply chain signals that no neat data column captures: "it arrived too late," "the fabric felt cheap," "the size was wrong." A large language model reads these reviews automatically and converts them into structured categories. As Section 6 explains, the Phase 4 results had made the value of this layer clear in advance: returns proved hard to predict from order data alone, and customer text is precisely the missing source of signal. Phase 5 built this layer and used it to check the whole model against independent real-world evidence.'));
 
 body.push(h2('4.5 The planned output layer'));
 body.push(p('The final phase will make the system usable and presentable: a spreadsheet-based tool of the kind supply chain analysts use daily, a lightweight interactive dashboard, and a written case study tying the whole project together. None of this is built at the time of writing; it is recorded here so the plan is complete.'));
@@ -192,7 +192,7 @@ body.push(pageBreak());
 
 // ===== SECTION 5 =====
 body.push(h1('5. The Work Plan: Six Phases'));
-body.push(p('Before any building began, the work was divided into six phases. Each phase produces something concrete and testable before the next begins. This document covers Phases 1 to 4.'));
+body.push(p('Before any building began, the work was divided into six phases. Each phase produces something concrete and testable before the next begins. This document covers Phases 1 to 5.'));
 body.push(spacer());
 body.push(table(
   ['Phase', 'Name', 'What it produces', 'Status'],
@@ -201,7 +201,7 @@ body.push(table(
     ['2', 'Synthetic data', 'A calibrated 5,000-order dataset and an exploratory analysis', 'Complete'],
     ['3', 'Rule-based scorer', 'A transparent 15-factor risk scorer and its documentation', 'Complete'],
     ['4', 'Machine learning model', 'Trained delay and return models, blended with the rule scorer', 'Complete'],
-    ['5', 'Language-model layer', 'Automated analysis of customer review text', 'Planned'],
+    ['5', 'Language-model layer', 'Automated review analysis and independent model validation', 'Complete'],
     ['6', 'Output layer', 'Spreadsheet tool, dashboard, and written case study', 'Planned'],
   ],
   [820, 2200, 4540, 1800]
@@ -294,7 +294,7 @@ body.push(p('A complete, transparent, fifteen-factor risk scorer; a dataset with
 
 // --- Day 6 ---
 body.push(h2('6.6 Day Six — The Machine Learning Model'));
-body.push(p('Day Six built the second prediction method: a machine learning model, which learns risk patterns from the data itself rather than from hand-written rules. At the time of writing, this phase is in progress; what follows covers the work completed so far.'));
+body.push(p('Day Six built the second prediction method: a machine learning model, which learns risk patterns from the data itself rather than from hand-written rules.'));
 body.push(h3('What was done'));
 body.push(p('Two specialised software libraries were installed — one a general toolkit for machine learning, the other a specific, powerful algorithm called XGBoost. The data was then prepared for the algorithm. Machine learning algorithms work only with numbers, so text columns such as a region name had to be converted into numeric form, a step called encoding. After encoding, the dataset’s ten columns of information had expanded into twenty-eight numeric columns.'));
 body.push(p('The data was then split into two parts: 80 percent for training the model and 20 percent kept hidden, for testing it. This separation is the single most important rule of honest machine learning. A model tested on data it has already studied could simply memorise the answers; only data it has never seen gives an honest measure of real performance.'));
@@ -313,6 +313,32 @@ body.push(p('The final step of Phase 4 was to blend the two methods — the hand
 body.push(p('The correction was to weight each blend toward whichever method was stronger for that particular task. The weighted hybrid then matched the best single method almost exactly for both predictions. But the more important conclusion concerned what the hybrid is actually for. Its value was never a higher accuracy score. Its value is two things an accuracy score cannot capture. It always carries the rule scorer’s plain-language reasons, so every prediction can be explained to the person acting on it. And it compares the two methods on every single order, agreeing on roughly 84 percent of them and flagging the remaining 16 percent, where the methods disagree, for a human to examine. That is a genuine, usable working procedure, not a number.'));
 body.push(h3('What Day Six produced'));
 body.push(p('Two trained machine learning models, each honestly measured; a feature-importance analysis that independently confirmed, for a third time, that delays can be predicted and returns largely cannot; and a performance-weighted hybrid that matches the best single method on accuracy while adding full explainability and a human-review flag. With this, Phase 4 is complete.'));
+
+// --- Day 7 ---
+body.push(h2('6.7 Day Seven — The Language-Model Layer'));
+body.push(p('Day Seven built the third and final source of insight in the prediction system: the language-model layer. Its purpose had been set by the Phase 4 results. Those results had shown, three separate times, that returns cannot be predicted from order-day information alone. The missing evidence — the reasons a customer actually sends a garment back — does not live in any data column. It lives in what customers themselves write. Day Seven went and read it.'));
+body.push(h3('What was done'));
+body.push(p('The raw material for this phase is the customer review. The brand chosen as the project’s reference case, a direct-to-consumer menswear company, has a mobile application, and that application carries a public page of customer reviews. A short program was written to collect those reviews automatically — a process called web scraping. It gathered about 1,200 recent reviews, each with its star rating and its written text, and saved them as a data file.'));
+body.push(p('These reviews matter for one specific reason: they are real, and they are independent. Every number in the synthetic dataset was shaped by the project’s own research. The reviews were not. They are the unfiltered words of real customers who have never heard of this project. That independence is exactly what allows them to check the model, rather than simply echo it.'));
+body.push(p('The star ratings of the collected reviews formed a revealing shape. Rather than clustering around the middle, they piled up at the two extremes — a large group of one-star reviews and a large group of five-star reviews, with relatively little in between. The angriest customers and the happiest customers are the ones who write; the indifferent majority stays silent. The large body of one-star reviews, in particular, was the project’s richest seam of supply chain complaints.'));
+body.push(p('Raw review text cannot be analysed directly; it must first be sorted into categories. So before any automation, a classification schema was designed — a fixed, agreed list of the things a review might be about. Six categories were settled on: a delivery delay, a return or refund problem, a sizing or fit problem, a product-quality problem, a customer-service problem, and, for reviews raising none of these, no category at all. The schema was deliberately multi-label, meaning a single review can be tagged with several categories at once, because real complaints often are: "it came late and the size was wrong" is two distinct problems in one sentence.'));
+body.push(p('The reading itself was done by a large language model — an artificial-intelligence system, reached through the paid API account opened back on Day Two, that can read ordinary text and judge its meaning. The model was given a careful written instruction, called a prompt. It was told to act as a supply chain analyst, given the precise definition of each of the six categories, and given firm rules: tag only what a review actually says, judge the words and never the star rating, and allow a review to carry more than one tag.'));
+body.push(p('The reviews could not sensibly be sent to the model one at a time — that would mean over a thousand separate requests — nor all in a single request. They were sent in batches of twenty, around sixty requests in total: small enough for the model to stay accurate on each review, large enough to keep the number of requests low.'));
+body.push(p('One difficulty had to be solved first. A language model, left to itself, replies in ordinary prose, and ordinary prose is unpredictable — it might add a friendly sentence, or format its answer differently each time. But this answer was not going to be read by a human. It was going to be read by other code, and code needs an answer in one exact, unvarying shape. The solution was a feature called structured outputs: the model is handed a strict template describing the precise shape its answer must take, and the service then guarantees the reply matches it. This turns "ask politely and hope" into a guaranteed, machine-readable result.'));
+body.push(p('The pipeline was first tested on a small sample of forty reviews — a deliberate habit, to confirm cheaply that it worked before committing to the full run — and then run across the whole set. It classified 1,189 reviews into their supply chain themes, at a total cost of roughly one US dollar of API credit.'));
+body.push(h3('Errors and setbacks'));
+body.push(p('The phase had its friction. Early on, a command meant to be run in the terminal was copied together with a short written note explaining what it did. The terminal did not treat that note as harmless: it tried to run the explanation as part of the instruction, and rejected the whole line. The cause, once seen, was simple — a command and a sentence describing the command are two different things, and only the command itself should ever be run. Nothing was damaged; the instruction had merely been refused before it could act.'));
+body.push(callout('The eleven missing reviews',
+  'The full run classified 1,189 reviews — not the 1,200 that were sent. Eleven had quietly gone missing, and the reason is worth understanding. The structured-outputs feature guarantees that every answer the model returns has the correct shape. It does not guarantee that the model returns an answer for every single review in a batch. Across sixty batches, eleven reviews were simply left out. The fix was to make the pipeline resumable: able to be run again, recognise which reviews were already classified, and process only the ones still missing. With that safeguard in place, the project then made a deliberate choice — rather than chase the final eleven, it proceeded with the 1,189. At 99.1 percent coverage, with the omitted reviews scattered at random, the analysis loses nothing real, and an honest footnote about eleven missing reviews is worth more than a hidden imperfection. The lesson is twofold: a guarantee about the shape of an answer is not a guarantee about its completeness; and any long task that costs money, or can fail partway, should be built so it can be safely resumed.'));
+body.push(h3('Validation: do real customers agree with the model?'));
+body.push(p('The reviews were classified so they could answer one question: does the model’s account of supply chain risk match what real customers actually complain about? Answering it required care, because the synthetic orders and the real reviews cannot be matched one to one — an invented order is not any real customer’s order. The comparison is therefore not a row-by-row check but a triangulation: a test of whether two entirely independent sources tell the same story. If a model built from benchmark-calibrated synthetic data, and the unfiltered voice of 1,189 real customers, point to the same problems, that agreement is strong evidence — precisely because the two sources share no common origin.'));
+body.push(p('Four things emerged. First, scope was confirmed: delivery delays and return problems, the two outcomes the model predicts, are both among the most common complaint themes in the reviews. The synthetic data had not been inventing problems that customers do not actually have. Second, return and refund complaints outnumbered delivery-delay complaints by roughly two to one. Returns are not a minor concern but a central one, which justifies the effort spent modelling them even though they are the harder of the two to predict.'));
+body.push(p('Third, and most important, the reviews explained the project’s central finding. The model cannot predict returns well because a return is driven by things knowable only after the parcel arrives — whether the garment fits, whether the fabric meets expectations. The reviews named exactly those factors: complaints about sizing and about product quality were present and specific. The order-day data the model sees cannot contain that information, because at the moment an order is placed it does not yet exist. A weak return prediction is therefore not a broken model; it is a model honestly missing information that no order-day system could ever hold.'));
+body.push(p('Fourth, an honest gap. The single most common complaint theme was poor customer service — something the model does not predict at all. But a closer look softened this. Of the customer-service complaints, around three in four also mentioned a delivery delay or a return problem. Poor service is, for the most part, not a separate failure but the visible aftermath of the operational failures the model already predicts: an order goes wrong, the customer contacts support, and the support experience compounds the damage. The model addresses the upstream cause, and the loud downstream symptom is largely a consequence of it.'));
+body.push(callout('Independent agreement is the opposite of circular reasoning',
+  'The fairest criticism of any project built on synthetic data is the charge of circularity: if the data was shaped by the author’s own assumptions, a model trained on it may simply be learning those assumptions back. Phase 5 is the project’s answer to that charge. The customer reviews were written by real people, with no connection to the project and no knowledge of its assumptions. When that fully independent evidence points to the same supply chain problems the model emphasises, the agreement cannot be an echo of the project’s own design. Independent corroboration is, by definition, the opposite of circular reasoning — and providing it was the entire purpose of this phase.'));
+body.push(h3('What Day Seven produced'));
+body.push(p('A set of 1,189 real customer reviews, each automatically classified into clear supply chain themes; a classification pipeline built to be resumable and honest about its own gaps; and a validation that did exactly what it was designed to do. Using evidence entirely independent of the project, it confirmed that the model is built around the right problems, and it explained, in customers’ own words, why one of the model’s two predictions is inherently the harder one. With this, Phase 5 is complete.'));
 body.push(pageBreak());
 
 // ===== SECTION 7 =====
@@ -348,6 +374,9 @@ body.push(table(
     ['rule scorer', 'Reads one order and returns its delay score, return score, and the written list of reasons behind each.'],
     ['scorer application', 'Runs the rule scorer across the whole dataset and checks its scores against what actually happened.'],
     ['model notebook', 'Trains, tests, and evaluates the two machine learning models.'],
+    ['review scraper', 'Collects about 1,200 real customer reviews from the brand’s app store page and saves them as a data file.'],
+    ['review classifier', 'Sends the reviews to a language model in batches and tags each one with its supply chain themes.'],
+    ['validation script', 'Compares the review themes against the model’s findings and produces the Phase 5 validation charts.'],
   ],
   [2500, 6860]
 ));
@@ -373,6 +402,8 @@ body.push(table(
     ['The rubric scale problem', 'A scoring system where everything scores alike cannot tell anything apart. Spread the weights.'],
     ['XGBoost would not run', 'Some components come from the language installer, some from the system installer. Read the error.'],
     ['The return models scored poorly', 'Not every problem is solvable with the data at hand. Saying so honestly is good analysis.'],
+    ['A command pasted with its comment', 'A command and a sentence describing it are two different things. Run only the command.'],
+    ['Eleven reviews silently omitted', 'A guarantee about an answer’s shape is not a guarantee it covers every input. Build long jobs to be resumable.'],
   ],
   [3900, 5460]
 ));
@@ -382,11 +413,11 @@ body.push(pageBreak());
 
 // ===== SECTION 10 =====
 body.push(h1('10. Where We Are Now, and What Comes Next'));
-body.push(p('At the time this document was last updated, Phases 1 through 4 are complete. The project has: a fully set-up development environment and code repository; a researched benchmark document with most figures cited; a calibrated five-thousand-order synthetic dataset; an exploratory analysis confirming the data behaves correctly; a transparent fifteen-factor rule-based scorer with strong delay performance; two trained machine learning models, with the delay model performing well and the return model honestly reported as weak; and a performance-weighted hybrid that combines the rule-based and machine-learning methods, matching the best single method on accuracy while adding explainability and a human-review flag.'));
-body.push(p('The work now moves to Phase 5, which will add the language-model layer that reads customer reviews — the layer the Phase 4 results showed is genuinely needed, since returns cannot be predicted from order data alone and customer text is the missing source of evidence. Phase 6 will then build the spreadsheet tool, the dashboard, and the final written case study.'));
+body.push(p('At the time this document was last updated, Phases 1 through 5 are complete. The project has: a fully set-up development environment and code repository; a researched benchmark document with most figures cited; a calibrated five-thousand-order synthetic dataset; an exploratory analysis confirming the data behaves correctly; a transparent fifteen-factor rule-based scorer with strong delay performance; two trained machine learning models, with the delay model performing well and the return model honestly reported as weak; a performance-weighted hybrid that combines the two; and a language-model layer that classified 1,189 real customer reviews and used them to validate the whole model against independent real-world evidence.'));
+body.push(p('The work now moves to Phase 6, the final phase. It will turn the working system into finished, presentable deliverables: a spreadsheet-based risk tool of the kind supply chain analysts use daily, a lightweight interactive dashboard, and a written case study tying the whole project together.'));
 body.push(p('One external thread remains open: a request to a university professor for expert validation of the project’s estimated supply chain lead-time figures. Because the parameters are kept separate from the logic, those figures can be updated the moment a reply arrives, with no disruption to the rest of the system.'));
 body.push(callout('A note on this document',
-  'This is a living document. It is updated at the end of each work session, so that it always reflects the true current state of the project. The next update will record the work of Phase 5.'));
+  'This is a living document. It is updated at the end of each work session, so that it always reflects the true current state of the project. The next update will record the work of Phase 6, the final phase.'));
 body.push(pageBreak());
 
 // ===== SECTION 11 — GLOSSARY =====
@@ -416,6 +447,12 @@ body.push(table(
     ['Leakage', 'The error of letting a model use information it could not really have in advance.'],
     ['Exploratory data analysis', 'Examining data with charts and summaries to understand and check it.'],
     ['Hybrid score', 'A single prediction formed by blending the rule-based and machine-learning results.'],
+    ['Web scraping', 'Collecting information from a website automatically with a small program.'],
+    ['Large language model', 'An artificial-intelligence system that reads ordinary text and judges its meaning.'],
+    ['Prompt', 'The written instruction given to a language model that tells it what to do.'],
+    ['Structured outputs', 'A feature that forces a language model’s reply into a fixed, machine-readable shape.'],
+    ['Multi-label classification', 'Sorting items into categories where one item may belong to several at once.'],
+    ['Triangulation', 'Checking a finding by testing whether independent sources agree on it.'],
   ],
   [2400, 6960]
 ));
