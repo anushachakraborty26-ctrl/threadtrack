@@ -227,3 +227,6 @@ docs/sources/*.txt
 # macOS junk
 .DS_Store
 
+# Process-doc builder dependencies (the build.js script itself is kept)
+docs/process_doc/node_modules/
+
