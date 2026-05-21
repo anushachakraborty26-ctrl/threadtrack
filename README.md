@@ -90,8 +90,7 @@ output/                generated charts
 
 ```bash
 python -m venv venv && source venv/bin/activate
-pip install pandas numpy scikit-learn xgboost anthropic python-dotenv \
-            google-play-scraper matplotlib seaborn jupyter
+pip install -r requirements.txt
 
 python src/generate_data.py      # build the synthetic dataset
 python src/apply_scorer.py       # run the rule-based scorer
