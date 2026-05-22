@@ -87,7 +87,7 @@ body.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 
 body.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 },
   children: [new TextRun({ text: 'National Institute of Fashion Technology', size: 22, color: '666666' })] }));
 body.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 600 },
-  children: [new TextRun({ text: 'Covering 19-21 May 2026 — Phases 1 to 5 complete', size: 22, color: '666666' })] }));
+  children: [new TextRun({ text: 'Covering 19-23 May 2026 — Phases 1 to 5 complete, Phase 6 in progress', size: 22, color: '666666' })] }));
 body.push(new Paragraph({ alignment: AlignmentType.CENTER,
   children: [new TextRun({ text: 'This document is written so a reader with no prior knowledge of supply chains, data analysis,', size: 20, color: '888888' })] }));
 body.push(new Paragraph({ alignment: AlignmentType.CENTER,
@@ -144,7 +144,7 @@ body.push(bullet('For every prediction, it produces a written list of the specif
 body.push(h2('2.3 What ThreadTrack is not'));
 body.push(p('Honesty about scope is part of good engineering. ThreadTrack is a portfolio project, and several things about it are deliberately limited.'));
 body.push(bullet('It does not use a real company’s private order data. No such data is publicly available. Instead it uses a synthetic (artificially generated) dataset, carefully calibrated so its statistical patterns match real, cited industry figures. Section 4 explains this choice in full.'));
-body.push(bullet('It is not, at the time of writing, a finished deployed product. It is being built in phases, and this document covers the first five of six planned phases.'));
+body.push(bullet('It is not, at the time of writing, a finished deployed product. It is being built in phases; five of the six are complete, and the sixth — which turns the working system into usable tools — is well under way.'));
 body.push(bullet('It does not claim perfect accuracy. As later sections show in detail, one of its two predictions works very well and the other is genuinely difficult, and the project says so plainly rather than hiding it.'));
 body.push(pageBreak());
 
@@ -171,7 +171,7 @@ body.push(bullet('The hand-built rule-based scorer reads each order and produces
 body.push(bullet('The machine learning model reads the same orders and produces its own, pattern-learned risk estimates.'));
 body.push(bullet('The two are blended into a single hybrid score.'));
 body.push(bullet('A language-model layer reads unstructured customer reviews and extracts supply chain complaints, providing an independent real-world check.'));
-body.push(bullet('Finally, an output layer (planned) will present everything through a spreadsheet tool, an interactive dashboard, and a written case study.'));
+body.push(bullet('Finally, an output layer presents everything through a spreadsheet tool, an interactive dashboard, and a written case study.'));
 
 body.push(h2('4.2 The data layer, and why the data is synthetic'));
 body.push(p('A prediction model learns from examples. To build one, the project needed a large table of past orders, each marked with whether it was eventually delayed or returned. No clothing brand publishes such private operational data. The project therefore generates its own.'));
@@ -186,13 +186,13 @@ body.push(p('Used together, the two cover each other’s weaknesses. When both a
 body.push(h2('4.4 The language-model layer'));
 body.push(p('A third source of insight is now built. Customer reviews are written in ordinary language and contain supply chain signals that no neat data column captures: "it arrived too late," "the fabric felt cheap," "the size was wrong." A large language model reads these reviews automatically and converts them into structured categories. As Section 6 explains, the Phase 4 results had made the value of this layer clear in advance: returns proved hard to predict from order data alone, and customer text is precisely the missing source of signal. Phase 5 built this layer and used it to check the whole model against independent real-world evidence.'));
 
-body.push(h2('4.5 The planned output layer'));
-body.push(p('The final phase will make the system usable and presentable: a spreadsheet-based tool of the kind supply chain analysts use daily, a lightweight interactive dashboard, and a written case study tying the whole project together. None of this is built at the time of writing; it is recorded here so the plan is complete.'));
+body.push(h2('4.5 The output layer'));
+body.push(p('The final phase makes the system usable and presentable. Two of its three parts are now built: a spreadsheet-based tool of the kind supply chain analysts use daily, and a lightweight interactive dashboard that runs in a web browser. The third part — a written case study tying the whole project together — remains to be written, as does the step of putting the dashboard online at a public address. Section 6 records this work in detail.'));
 body.push(pageBreak());
 
 // ===== SECTION 5 =====
 body.push(h1('5. The Work Plan: Six Phases'));
-body.push(p('Before any building began, the work was divided into six phases. Each phase produces something concrete and testable before the next begins. This document covers Phases 1 to 5.'));
+body.push(p('Before any building began, the work was divided into six phases. Each phase produces something concrete and testable before the next begins. This document covers Phases 1 to 5 in full, and the work of Phase 6 completed so far.'));
 body.push(spacer());
 body.push(table(
   ['Phase', 'Name', 'What it produces', 'Status'],
@@ -202,7 +202,7 @@ body.push(table(
     ['3', 'Rule-based scorer', 'A transparent 15-factor risk scorer and its documentation', 'Complete'],
     ['4', 'Machine learning model', 'Trained delay and return models, blended with the rule scorer', 'Complete'],
     ['5', 'Language-model layer', 'Automated review analysis and independent model validation', 'Complete'],
-    ['6', 'Output layer', 'Spreadsheet tool, dashboard, and written case study', 'Planned'],
+    ['6', 'Output layer', 'Spreadsheet tool, dashboard, and written case study', 'In progress'],
   ],
   [820, 2200, 4540, 1800]
 ));
@@ -339,6 +339,31 @@ body.push(callout('Independent agreement is the opposite of circular reasoning',
   'The fairest criticism of any project built on synthetic data is the charge of circularity: if the data was shaped by the author’s own assumptions, a model trained on it may simply be learning those assumptions back. Phase 5 is the project’s answer to that charge. The customer reviews were written by real people, with no connection to the project and no knowledge of its assumptions. When that fully independent evidence points to the same supply chain problems the model emphasises, the agreement cannot be an echo of the project’s own design. Independent corroboration is, by definition, the opposite of circular reasoning — and providing it was the entire purpose of this phase.'));
 body.push(h3('What Day Seven produced'));
 body.push(p('A set of 1,189 real customer reviews, each automatically classified into clear supply chain themes; a classification pipeline built to be resumable and honest about its own gaps; and a validation that did exactly what it was designed to do. Using evidence entirely independent of the project, it confirmed that the model is built around the right problems, and it explained, in customers’ own words, why one of the model’s two predictions is inherently the harder one. With this, Phase 5 is complete.'));
+
+// --- Day 8 ---
+body.push(h2('6.8 Day Eight — The Output Layer'));
+body.push(p('The first seven days built a working prediction system. But a system is not the same thing as a tool. The scorer, the models, and the review analysis all lived in code, runnable only by the person who wrote them. Day Eight — the work of Phase 6 — set out to turn that system into something a real person could pick up and use. It produced two distinct tools, built on purpose for two different kinds of user.'));
+body.push(h3('Why two tools, and not one'));
+body.push(p('A single dashboard would have been simpler to build. It was not built, because the people who would use ThreadTrack do not all work the same way. A supply chain analyst inside a clothing brand lives, in practice, inside spreadsheets — that is the environment they trust and control. A planning manager, or a hiring manager reviewing this project, wants something they can click through in a browser without installing anything at all. Forcing both kinds of user into one format would have served neither of them well. So the output layer has two front doors: a spreadsheet tool for the people who work in spreadsheets, and an interactive dashboard for everyone else.'));
+body.push(h3('The spreadsheet tool'));
+body.push(p('The first deliverable is a spreadsheet workbook that reproduces the rule-based scorer entirely inside spreadsheet formulas. This is not a screenshot, and it is not an export of results. It is the scorer itself, rebuilt in the one tool a supply chain analyst already knows. An analyst types the details of a new order into a row, and the workbook computes its delay score, its return score, the risk band for each, and the written list of reasons behind them — using the exact same fifteen-factor logic as the project’s code.'));
+body.push(p('The workbook has four sheets. A "Read me" sheet explains, in plain terms, what the tool does and how to use it. An "Order book" sheet is the working surface, where orders are entered and scored, with the risk bands colour-coded so the dangerous orders stand out at a glance. A "Summary" sheet rolls the order book up into totals. A "Rubric" sheet lists every one of the fifteen factors and its exact point weights, so the analyst can see precisely why the tool scores the way it does — the same transparency principle that governs the whole project.'));
+body.push(p('Two spreadsheet features do quiet but important work. Conditional formatting is a rule that paints a cell a colour based on its value; here it turns a high-risk score red without anyone colouring it by hand. Data validation is a rule that restricts what a cell will accept; here it forces the fabric, payment, and season fields to be chosen from fixed lists, so a typo cannot silently break a formula. Together they make the workbook hard to use wrongly.'));
+body.push(h3('The interactive dashboard'));
+body.push(p('The second deliverable is a web dashboard: a single application, organised into four tabs, that anyone can open in a browser. The first tab, the Order book, shows every scored order in a filterable, sortable, colour-coded table, with a panel to inspect any single order in full. The second tab, Score a new order, is a live form: a user enters the details of an order they are about to place and receives its risk assessment at once. The third tab, the Portfolio view, rolls the whole order book up into the totals and charts a manager would want — how many orders are high-risk, and how risk varies by manufacturing region and by season. The fourth tab, How it works, explains the model and shows the Phase 5 validation in plain language.'));
+body.push(p('The dashboard was shaped by one consistent principle: a user should be asked only for things they actually know, and never made to do the system’s reasoning on its behalf. Three design decisions followed directly from that principle.'));
+body.push(p([b('The user enters a city, not a tier. '), t('Delivery distance in the model is captured by a city’s "tier" — a three-level grading of how far and how difficult a place is to deliver to. But the person placing an order knows the city; they should not be asked to know its tier. So the dashboard carries a built-in classification of roughly one hundred and sixty Indian cities, and derives the tier itself the moment a city is chosen.')]));
+body.push(p([b('The user picks a vendor, not a set of vendor statistics. '), t('Each supplier carries several attributes the scorer needs — its manufacturing region, its reliability, whether it is still unproven. A user should not be typing reliability figures by hand. They choose a vendor from a list, and every attribute is looked up automatically. A first-time vendor can be added on the spot; once an order with it is confirmed, it joins the list for next time.')]));
+body.push(p([b('The user enters an order date, not a season. '), t('The season an order falls into changes its risk — but "season" is not a fact a user should have to judge, and it is not even uniform across the country. The Indian monsoon reaches the four manufacturing regions on different timelines. So the dashboard holds a small region-aware calendar: the user enters the date the order is placed, and the season — normal, monsoon, or festive — is worked out from that date together with the supplier’s region. The same date can be monsoon for one region and an ordinary month for another, and the calendar reflects that.')]));
+body.push(p('A fourth decision concerned what happens after an order is scored. The dashboard does not simply file the new order away. It shows the score first, and then asks the user to confirm the order or discard it. This is deliberate. The tool exists to support a decision — whether to place this order at all — and the score is meant to inform that decision, not to make it. The human makes the call; the tool only makes the call better informed. This is the same "an assistant, not a replacement" principle stated back in Section 3, now built directly into the shape of the screen.'));
+body.push(h3('Errors and setbacks'));
+body.push(callout('The #NAME? error: Excel’s hidden function names',
+  'When the workbook was first generated, one column — the written list of risk reasons — showed the error "#NAME?" in every row instead of any text. "#NAME?" is Excel’s way of saying it does not recognise a name used in a formula. The cause was specific and instructive. The formula used a function called TEXTJOIN, a relatively modern addition to Excel. For backward compatibility, a program that writes a spreadsheet file directly must refer to these newer functions by a special internal name, prefixed with "_xlfn." A formula written as plain "TEXTJOIN" is understood when a human types it, but must be written as "_xlfn.TEXTJOIN" when a program writes the file. Adding the prefix fixed every row at once. The lesson: a file written by a program is not always identical to the same file typed by a person, and the difference is exactly where this kind of bug hides.'));
+body.push(callout('The KeyError: state that outlived the code',
+  'While the dashboard was being built, it began to show a red error wall: a "KeyError," which means the program asked for a stored piece of information that was not there. The cause was subtle. The dashboard keeps a small memory of the current session — the last order the user scored, and so on. During development the code is edited constantly, and the page reloads itself each time it is saved; but the session memory survives those reloads. An order scored by an older version of the code had left behind a memory in a shape the newer code no longer expected, and the newer code, reaching for a piece the old shape did not contain, failed. The fix was to store all the related pieces of that memory as a single unit, so it can never again exist in a half-updated shape. The lesson is general, and applies to any program that remembers things while its own code changes: stored state can outlive the code that created it, and code must be written to survive that.'));
+body.push(h3('What Day Eight produced, and what remains'));
+body.push(p('Day Eight produced the two tools that make ThreadTrack usable by someone other than its author: a spreadsheet workbook that rebuilds the scorer inside the analyst’s own environment, and a four-tab interactive dashboard built around the principle of asking the user only what they genuinely know. Both are working, and both are committed to the project repository.'));
+body.push(p('Phase 6 is not yet finished. Two pieces of the output layer remain. The first is putting the dashboard online at a public web address, so it can be opened by anyone with the link, with no installation at all. The second is the written case study — a single document that ties the whole six-phase project together for a reader deciding whether to hire its author, and that sets out what a real production deployment of ThreadTrack would require beyond this portfolio version. The next update to this document will record both, and will mark Phase 6, and the project, complete.'));
 body.push(pageBreak());
 
 // ===== SECTION 7 =====
@@ -377,6 +402,8 @@ body.push(table(
     ['review scraper', 'Collects about 1,200 real customer reviews from the brand’s app store page and saves them as a data file.'],
     ['review classifier', 'Sends the reviews to a language model in batches and tags each one with its supply chain themes.'],
     ['validation script', 'Compares the review themes against the model’s findings and produces the Phase 5 validation charts.'],
+    ['workbook builder', 'Generates the spreadsheet risk tool — rebuilding the fifteen-factor scorer in Excel formulas across four sheets, with colour-coding and input validation.'],
+    ['dashboard', 'The four-tab web application: the order book, the live scoring form, the portfolio roll-up, and the explanation of the model.'],
   ],
   [2500, 6860]
 ));
@@ -413,11 +440,11 @@ body.push(pageBreak());
 
 // ===== SECTION 10 =====
 body.push(h1('10. Where We Are Now, and What Comes Next'));
-body.push(p('At the time this document was last updated, Phases 1 through 5 are complete. The project has: a fully set-up development environment and code repository; a researched benchmark document with most figures cited; a calibrated five-thousand-order synthetic dataset; an exploratory analysis confirming the data behaves correctly; a transparent fifteen-factor rule-based scorer with strong delay performance; two trained machine learning models, with the delay model performing well and the return model honestly reported as weak; a performance-weighted hybrid that combines the two; and a language-model layer that classified 1,189 real customer reviews and used them to validate the whole model against independent real-world evidence.'));
-body.push(p('The work now moves to Phase 6, the final phase. It will turn the working system into finished, presentable deliverables: a spreadsheet-based risk tool of the kind supply chain analysts use daily, a lightweight interactive dashboard, and a written case study tying the whole project together.'));
+body.push(p('At the time this document was last updated, Phases 1 through 5 are complete, and Phase 6 is well under way. The project has: a fully set-up development environment and code repository; a researched benchmark document with most figures cited; a calibrated five-thousand-order synthetic dataset; an exploratory analysis confirming the data behaves correctly; a transparent fifteen-factor rule-based scorer with strong delay performance; two trained machine learning models, with the delay model performing well and the return model honestly reported as weak; a performance-weighted hybrid that combines the two; and a language-model layer that classified 1,189 real customer reviews and used them to validate the whole model against independent real-world evidence.'));
+body.push(p('Phase 6, the final phase, turns that working system into finished, usable tools. Two of its three deliverables are now built and committed: a spreadsheet-based risk tool of the kind supply chain analysts use daily, and a four-tab interactive dashboard that runs in a web browser. Two tasks remain before the project is complete: putting the dashboard online at a public web address, and writing the case study that ties the whole project together and sets out what a real production deployment would require.'));
 body.push(p('One external thread remains open: a request to a university professor for expert validation of the project’s estimated supply chain lead-time figures. Because the parameters are kept separate from the logic, those figures can be updated the moment a reply arrives, with no disruption to the rest of the system.'));
 body.push(callout('A note on this document',
-  'This is a living document. It is updated at the end of each work session, so that it always reflects the true current state of the project. The next update will record the work of Phase 6, the final phase.'));
+  'This is a living document. It is updated at the end of each work session, so that it always reflects the true current state of the project. The next update will record the completion of Phase 6 — the dashboard online at a public address, and the case study written — and with it the completion of the project.'));
 body.push(pageBreak());
 
 // ===== SECTION 11 — GLOSSARY =====
@@ -453,6 +480,9 @@ body.push(table(
     ['Structured outputs', 'A feature that forces a language model’s reply into a fixed, machine-readable shape.'],
     ['Multi-label classification', 'Sorting items into categories where one item may belong to several at once.'],
     ['Triangulation', 'Checking a finding by testing whether independent sources agree on it.'],
+    ['Dashboard', 'An interactive screen that presents data and tools in a browser, organised for quick use.'],
+    ['Conditional formatting', 'A spreadsheet rule that changes a cell’s appearance automatically, based on its value.'],
+    ['Data validation', 'A spreadsheet rule that restricts a cell to accept only values from a fixed, allowed set.'],
   ],
   [2400, 6960]
 ));
