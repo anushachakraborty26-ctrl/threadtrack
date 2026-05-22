@@ -8,3 +8,4 @@ google-play-scraper==1.2.7
 matplotlib==3.10.9
 seaborn==0.13.2
 jupyter==1.1.1
+openpyxl==3.1.5
