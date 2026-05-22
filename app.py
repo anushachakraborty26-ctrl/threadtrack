@@ -13,10 +13,12 @@ live scoring, calls the rule scorer directly (src/rule_scorer.py).
 Run locally:   streamlit run app.py
 """
 
+from datetime import date
+
 import pandas as pd
 import streamlit as st
 
-from src.config import VENDORS
+from src.config import FESTIVE_MONTHS, REGIONAL_MONSOON_MONTHS, VENDORS
 from src.rule_scorer import score_order
 
 ORDERS_CSV = "data/scored_pos.csv"
@@ -84,6 +86,21 @@ def band_of(score):
     if score <= 65:
         return "Medium"
     return "High"
+
+
+def season_for(order_date, cluster):
+    """Derive the supply-chain season from an order date and the vendor cluster.
+
+    The Indian monsoon reaches the apparel clusters on different timelines, so
+    the same date can be 'monsoon' for one cluster and 'normal' for another.
+    Festive (Sep-Nov) is national and wins any overlap with monsoon.
+    """
+    month = order_date.month
+    if month in FESTIVE_MONTHS:
+        return "festive"
+    if month in REGIONAL_MONSOON_MONTHS.get(cluster, []):
+        return "monsoon"
+    return "normal"
 
 
 def recommended_action(delay_band, return_band):
@@ -273,7 +290,10 @@ with tab_score:
 
         c1, c2, _ = st.columns(3)
         payment = c1.selectbox("Payment mode", ["COD", "Prepaid"])
-        season = c2.selectbox("Season", ["normal", "festive", "monsoon"])
+        order_date = c2.date_input("Order date", value=date.today())
+
+        st.caption("Season — normal, monsoon or festive — is derived from the order "
+                   "date and the vendor's cluster; you do not set it by hand.")
 
         submitted = st.form_submit_button("Score this order")
 
@@ -299,6 +319,7 @@ with tab_score:
             v_is_new, v_cluster, v_rel = v["is_new"], v["cluster"], v["reliability"]
             book_vendor_id = vendor_choice
         tier = city_tier[city]              # tier comes from the destination city
+        season = season_for(order_date, v_cluster)   # season follows date + cluster
         order = {
             "vendor_is_new": v_is_new,
             "vendor_cluster": v_cluster,
@@ -315,6 +336,7 @@ with tab_score:
             "order": order,
             "result": score_order(order),
             "place": f"{city} ({tier})",
+            "po_date": order_date.strftime("%Y-%m-%d"),
             "vendor_id": book_vendor_id,
             "new_vendor": new_vendor,
         }
@@ -329,7 +351,7 @@ with tab_score:
         st.markdown(
             f"**Scored order** — {pending['vendor_id']} · {o['fabric_type']} · "
             f"{o['order_qty']:,} pcs · {o['payment_mode']} · {pending['place']} · "
-            f"{o['season']}")
+            f"{pending['po_date']}, {o['season']} season")
         render_result(pending["result"])
 
         st.divider()
@@ -355,7 +377,7 @@ with tab_score:
             po_id = f"NEW-{len(st.session_state['added']) + 1:03d}"
             st.session_state["added"].append({
                 "po_id": po_id,
-                "po_date": pd.Timestamp.today().strftime("%Y-%m-%d"),
+                "po_date": pending["po_date"],
                 "vendor_id": pending["vendor_id"],
                 **pending["order"],
                 "delay_score": result["delay_score"],

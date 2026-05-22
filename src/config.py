@@ -201,6 +201,41 @@ SEASON_BY_MONTH = {
 
 
 # =============================================================================
+# REGION-AWARE SEASON CALENDAR (dashboard live scoring)
+# =============================================================================
+# SEASON_BY_MONTH above is a single national calendar — it is what the data
+# generator uses, and it is left unchanged so the 5,000-order dataset stays
+# reproducible.
+#
+# The live dashboard does something more precise. When a user enters an order
+# DATE, the season is derived from that date AND the vendor's manufacturing
+# cluster, because the Indian monsoon reaches the four clusters on different
+# timelines — the same date can be monsoon in one cluster and a normal month
+# in another.
+#
+# Modelling choices (documented so they stay auditable, like every number here):
+#   - Season is keyed to the VENDOR'S cluster, not the delivery destination:
+#     season's job in the model is to slow the supply chain, and the slow
+#     stages — fabric sourcing + cut/sew/finishing — happen at the cluster.
+#   - FESTIVE (Sep-Nov) is treated as national; the D2C demand surge around
+#     Dussehra/Diwali is roughly uniform across the country.
+#   - MONSOON onset is regional — that is the source of the variation below.
+#   - Where festive and monsoon overlap, festive wins (its supply-chain
+#     effect dominates for a D2C brand).
+# Granularity is the month, on purpose: monsoon onset is a ~2-week window, so
+# day-level precision would be false precision. Tune these when validated.
+
+REGIONAL_MONSOON_MONTHS = {
+    "Tirupur":   [6, 7],      # Tamil Nadu — weak SW monsoon (rain-shadow), short window
+    "Bengaluru": [6, 7, 8],   # Karnataka — full SW monsoon, Jun-Aug
+    "Ludhiana":  [7, 8],      # Punjab — SW monsoon arrives late in NW India
+    "Delhi NCR": [7, 8],      # NW India — late onset, withdraws by late Sep
+}
+
+FESTIVE_MONTHS = [9, 10, 11]  # national — Dussehra / Diwali D2C demand surge
+
+
+# =============================================================================
 # DEMAND VOLUME PATTERN
 # =============================================================================
 # Festive months see 3x normal order volume (§2)
