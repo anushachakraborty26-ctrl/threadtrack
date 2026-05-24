@@ -41,10 +41,17 @@ def score_order(order):
     Parameters
     ----------
     order : dict
-        One purchase order. Expected keys:
+        One purchase order. Expected v1 keys:
         vendor_is_new (bool), vendor_cluster (str), vendor_reliability (float),
         fabric_type (str), order_qty (int), destination_tier (str),
-        payment_mode (str), season (str)
+        payment_mode (str), season (str).
+
+        Optional v2 upstream-operational keys (additional factors fire if
+        present; absent values are treated as best-case defaults so the
+        scorer stays backward-compatible with v1 data):
+        sampling_delay_days (int), fabric_arrival_delay_days (int),
+        trims_confirmation_lag_days (int), factory_ncr_count (int),
+        buyer_change_frequency (int, 1-3).
 
     Returns
     -------
@@ -158,10 +165,62 @@ def score_order(order):
         return_score += 2
         delay_reasons.append("New vendor in Tirupur — compounding capacity risk (+10 delay)")
         return_reasons.append("New vendor in Tirupur — compounding return risk (+2 return)")
+
+    # =========================================================================
+    # v2 UPSTREAM OPERATIONAL FACTORS (16-21)
+    # =========================================================================
+    # The signals planners actually watch day to day. Backward-compatible —
+    # missing on v1 rows means the factor does not fire (uses .get(default)).
+
+    # --- Factor 16: sampling delay 3+ days ---
+    if order.get("sampling_delay_days", 0) >= 3:
+        delay_score += 6
+        delay_reasons.append(
+            "Sampling delay 3+ days — production pushed back (+6 delay)")
+
+    # --- Factor 17: fabric arrival delay 5+ days ---
+    if order.get("fabric_arrival_delay_days", 0) >= 5:
+        delay_score += 8
+        delay_reasons.append(
+            "Fabric mill missed date by 5+ days — cut/sew starts late (+8 delay)")
+
+    # --- Factor 18: trims confirmation lag 3+ days ---
+    if order.get("trims_confirmation_lag_days", 0) >= 3:
+        delay_score += 5
+        return_score += 6
+        delay_reasons.append(
+            "Trims confirmation 3+ days late — buyer-side bottleneck (+5 delay)")
+        return_reasons.append(
+            "Late trims confirmation — last-minute rework raises return risk (+6 return)")
+
+    # --- Factor 19: factory NCR count 4+ ---
+    if order.get("factory_ncr_count", 0) >= 4:
+        delay_score += 3
+        return_score += 14
+        delay_reasons.append(
+            "Factory has 4+ recent NCRs — quality backlog (+3 delay)")
+        return_reasons.append(
+            "Factory has 4+ recent NCRs — elevated quality return risk (+14 return)")
+
+    # --- Factor 20: buyer-change frequency = frequent (level 3) ---
+    if order.get("buyer_change_frequency", 1) == 3:
+        delay_score += 6
+        return_score += 10
+        delay_reasons.append(
+            "Buyer changes trims frequently — late-stage rework risk (+6 delay)")
+        return_reasons.append(
+            "Buyer changes trims frequently — quality risk on delivered goods (+10 return)")
+
+    # --- Factor 21: sampling delay AND first-cycle vendor (compounding) ---
+    if order.get("sampling_delay_days", 0) >= 3 and order.get("vendor_is_new"):
+        delay_score += 6
+        delay_reasons.append(
+            "Sampling delay on a first-cycle vendor — compounding risk (+6 delay)")
+
     # --- Factor 15: predicted delay feeds return risk ---
     # delay_score is a PREDICTION computed above — known at order time, not a
     # future outcome. Using it as a return signal is legitimate (no leakage).
-    
+
     if delay_score >= 60:
         return_score += 15
         return_reasons.append("High predicted delay risk — delayed orders return more (+15 return)")

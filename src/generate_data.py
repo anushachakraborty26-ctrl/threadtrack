@@ -29,7 +29,6 @@ import pandas as pd
 
 from src import config
 
-
 # =============================================================================
 # SETUP
 # =============================================================================
@@ -107,6 +106,72 @@ def pick_order_qty():
     return max(config.ORDER_QTY_MIN, min(config.ORDER_QTY_MAX, qty))
 
 
+def pick_upstream_features(vendor, fabric, season):
+    """Sample the upstream operational signals for one order (v2).
+
+    These are the signals planners actually watch — sampling delay, fabric
+    mill slip, trims-confirmation lag, factory NCR backlog, buyer-change
+    frequency. They are correlated with the order's actual outcome through
+    the lead-time and return-probability amplifiers in config.py.
+    """
+    p = config.UPSTREAM_FEATURE_PARAMS
+
+    # --- sampling delay days ---
+    s = p["sampling_delay_days"]
+    s_mean = s["base_mean"]
+    if vendor["is_new"]:
+        s_mean *= s["new_vendor_multiplier"]
+    if season == "festive":
+        s_mean *= s["festive_multiplier"]
+    sampling_delay = max(0, round(np.random.lognormal(
+        mean=np.log(s_mean), sigma=s["base_sigma"])))
+    sampling_delay = min(sampling_delay, s["max_days"])
+
+    # --- fabric arrival delay days ---
+    f = p["fabric_arrival_delay_days"]
+    f_mean = f["base_mean_woven"] if fabric == "woven" else f["base_mean_knit"]
+    if season == "monsoon":
+        f_mean *= f["monsoon_multiplier"]
+    if season == "festive":
+        f_mean *= f["festive_multiplier"]
+    fabric_arrival = max(0, round(np.random.lognormal(
+        mean=np.log(f_mean), sigma=f["base_sigma"])))
+    fabric_arrival = min(fabric_arrival, f["max_days"])
+
+    # --- trims confirmation lag days ---
+    t = p["trims_confirmation_lag_days"]
+    t_mean = t["base_mean"]
+    if season == "festive":
+        t_mean *= t["festive_multiplier"]
+    trims_lag = max(0, round(np.random.lognormal(
+        mean=np.log(t_mean), sigma=t["base_sigma"])))
+    trims_lag = min(trims_lag, t["max_days"])
+
+    # --- factory NCR count (Poisson) ---
+    n = p["factory_ncr_count"]
+    n_lambda = n["base_lambda"]
+    if vendor["reliability"] < n["low_reliability_threshold"]:
+        n_lambda *= n["low_reliability_multiplier"]
+    if vendor["is_new"]:
+        n_lambda *= n["new_vendor_multiplier"]
+    ncr_count = int(np.random.poisson(n_lambda))
+    ncr_count = min(ncr_count, n["max_count"])
+
+    # --- buyer change frequency (1 rare | 2 occasional | 3 frequent) ---
+    b = p["buyer_change_frequency"]
+    levels = list(b["probabilities"].keys())
+    probs = list(b["probabilities"].values())
+    buyer_change = int(np.random.choice(levels, p=probs))
+
+    return {
+        "sampling_delay_days":          sampling_delay,
+        "fabric_arrival_delay_days":    fabric_arrival,
+        "trims_confirmation_lag_days":  trims_lag,
+        "factory_ncr_count":            ncr_count,
+        "buyer_change_frequency":       buyer_change,
+    }
+
+
 # =============================================================================
 # LEAD TIME CALCULATIONS
 # =============================================================================
@@ -117,28 +182,30 @@ def calculate_planned_lead_time(fabric, tier):
     This is what the buyer 'promises' — the planned delivery date.
     """
     total = 0.0
-    for stage, (mean, _std) in config.LEAD_TIMES[fabric].items():
+    for _stage, (mean, _std) in config.LEAD_TIMES[fabric].items():
         total += mean
     last_mile_mean, _ = config.LAST_MILE[tier]
     total += last_mile_mean
     return round(total)
 
 
-def calculate_actual_lead_time(fabric, tier, vendor, season):
+def calculate_actual_lead_time(fabric, tier, vendor, season, upstream):
     """
-    Actual lead time = planned WITH noise + real-world amplifiers.
+    Actual lead time = planned WITH noise + real-world amplifiers + upstream signals.
 
     Amplifiers stacked in this order:
       1. Sample each stage WITH variance (normal distribution)
-      2. Seasonal amplifier (festive +30%, monsoon +10/40%, normal 1.0)
+      2. Seasonal amplifier (festive +20%, monsoon +10-22%, normal 1.0)
       3. Cluster utilization penalty (non-linear above 0.85)
       4. Vendor reliability noise (lower reliability = wider variance)
-      5. New vendor amplifier (first-cycle slip: 1.8x)
+      5. New vendor amplifier (first-cycle slip: 1.30x)
+      6. v2 upstream operational delays — sampling delay, fabric arrival,
+         trims confirmation lag, factory NCR backlog, buyer-change frequency
     """
     total = 0.0
 
     # 1. Sample each production stage with noise
-    for stage, (mean, std) in config.LEAD_TIMES[fabric].items():
+    for _stage, (mean, std) in config.LEAD_TIMES[fabric].items():
         total += np.random.normal(mean, std)
 
     # Sample last mile with noise
@@ -161,6 +228,15 @@ def calculate_actual_lead_time(fabric, tier, vendor, season):
     if vendor["is_new"]:
         total *= 1.30  # was 1.8 — too aggressive when stacked with other amps
 
+    # 6. v2 upstream operational delays — the signals planners actually watch
+    amp = config.UPSTREAM_LEAD_TIME_AMPLIFIERS
+    total += upstream["sampling_delay_days"]         * amp["sampling_delay_days_factor"]
+    total += upstream["fabric_arrival_delay_days"]   * amp["fabric_arrival_delay_days_factor"]
+    total += upstream["trims_confirmation_lag_days"] * amp["trims_confirmation_lag_days_factor"]
+    total += upstream["factory_ncr_count"]           * amp["factory_ncr_per_count"]
+    if upstream["buyer_change_frequency"] >= 2:
+        total += (upstream["buyer_change_frequency"] - 1) * amp["buyer_change_per_level_above_1"]
+
     # Clip to a sensible minimum (no order takes <5 days end-to-end)
     return max(5, round(total))
 
@@ -169,9 +245,10 @@ def calculate_actual_lead_time(fabric, tier, vendor, season):
 # RETURN PROBABILITY
 # =============================================================================
 
-def calculate_return_probability(payment_mode, season, tier, is_delayed, vendor):
+def calculate_return_probability(payment_mode, season, tier, is_delayed, vendor, upstream):
     """
-    Stack RETURN_MULTIPLIERS on top of the base 22% fashion D2C rate.
+    Stack RETURN_MULTIPLIERS on top of the base 22% fashion D2C rate, plus
+    v2 upstream-signal multipliers (NCR backlog, trims lag, buyer churn).
     Capped at 95% (realistic ceiling — no category returns at 100%).
     """
     prob = config.RETURN_RATE_BASE
@@ -195,6 +272,15 @@ def calculate_return_probability(payment_mode, season, tier, is_delayed, vendor)
     if vendor["is_new"]:
         prob *= config.RETURN_MULTIPLIERS["new_vendor"]
 
+    # v2: upstream-signal multipliers — quality backlog, trims lag, buyer churn
+    rm = config.UPSTREAM_RETURN_MULTIPLIERS
+    if upstream["factory_ncr_count"] >= rm["ncr_high_threshold"]:
+        prob *= rm["ncr_high_multiplier"]
+    if upstream["trims_confirmation_lag_days"] >= rm["trims_lag_high_threshold"]:
+        prob *= rm["trims_lag_high_multiplier"]
+    if upstream["buyer_change_frequency"] == 3:
+        prob *= rm["buyer_change_high_multiplier"]
+
     return min(0.95, prob)
 
 
@@ -213,13 +299,17 @@ def generate_one_order(date_range):
     qty = pick_order_qty()
     season = config.SEASON_BY_MONTH[po_date.month]
 
+    # v2: sample upstream operational signals before lead time so they amplify it
+    upstream = pick_upstream_features(vendor, fabric, season)
+
     planned = calculate_planned_lead_time(fabric, tier)
-    actual = calculate_actual_lead_time(fabric, tier, vendor, season)
+    actual = calculate_actual_lead_time(fabric, tier, vendor, season, upstream)
 
     delay_days = actual - planned
     is_delayed = delay_days > config.DELAY_BUFFER_DAYS
 
-    return_prob = calculate_return_probability(payment, season, tier, is_delayed, vendor)
+    return_prob = calculate_return_probability(
+        payment, season, tier, is_delayed, vendor, upstream)
     is_returned = random.random() < return_prob
 
     delivery_date = po_date + timedelta(days=actual)
@@ -238,13 +328,20 @@ def generate_one_order(date_range):
         "destination_tier": tier,
         "payment_mode": payment,
         "season": season,
+        # v2 upstream operational signals — the day-to-day signals planners watch
+        "sampling_delay_days":         upstream["sampling_delay_days"],
+        "fabric_arrival_delay_days":   upstream["fabric_arrival_delay_days"],
+        "trims_confirmation_lag_days": upstream["trims_confirmation_lag_days"],
+        "factory_ncr_count":           upstream["factory_ncr_count"],
+        "buyer_change_frequency":      upstream["buyer_change_frequency"],
+        # planned, actual, outcomes
         "planned_lead_time_days": planned,
-        "actual_lead_time_days": actual,
-        "delivery_date": delivery_date.strftime("%Y-%m-%d"),
-        "delay_days": delay_days,
-        "is_delayed": is_delayed,
-        "return_probability": round(return_prob, 3),
-        "is_returned": is_returned,
+        "actual_lead_time_days":  actual,
+        "delivery_date":          delivery_date.strftime("%Y-%m-%d"),
+        "delay_days":             delay_days,
+        "is_delayed":             is_delayed,
+        "return_probability":     round(return_prob, 3),
+        "is_returned":            is_returned,
     }
 
 

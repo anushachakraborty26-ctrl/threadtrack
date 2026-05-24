@@ -270,6 +270,93 @@ RETURN_MULTIPLIERS = {
 
 
 # =============================================================================
+# UPSTREAM OPERATIONAL FEATURES  (v2)
+# =============================================================================
+# v1 features are macro/strategic: vendor, cluster, season, fabric, tier,
+# payment, qty. They get the model to the textbook ceiling and no further.
+#
+# v2 adds the operational signals a planner actually watches day to day —
+# sampling delay, fabric mill slip, trims confirmation lag, factory NCR
+# backlog, and how often the buyer changes trims late. These are sampled
+# per order in the generator and used to amplify the actual lead time and
+# return probability, so the data carries genuine signal for the scorer
+# and the ML model to learn from.
+#
+# These are calibrated estimates, not citations. They are deliberately the
+# signals that go missing, arrive late, or arrive with typos in a real
+# factory ERP — which is exactly why a model trained without them is
+# operationally hollow.
+
+UPSTREAM_FEATURE_PARAMS = {
+    "sampling_delay_days": {
+        # Days the sampling/approval team missed their target — usually 0-3,
+        # occasionally 5-10. First-cycle vendors and festive crunch worsen it.
+        "base_mean": 1.8,
+        "base_sigma": 0.9,
+        "new_vendor_multiplier": 1.5,
+        "festive_multiplier": 1.3,
+        "max_days": 15,
+    },
+    "fabric_arrival_delay_days": {
+        # Days the fabric mill missed its date. Wovens have longer supply
+        # chains and slip more often; monsoon worsens it further.
+        "base_mean_knit": 1.0,
+        "base_mean_woven": 2.5,
+        "base_sigma": 1.0,
+        "monsoon_multiplier": 1.4,
+        "festive_multiplier": 1.2,
+        "max_days": 20,
+    },
+    "trims_confirmation_lag_days": {
+        # Days the buyer was late confirming trims, colour, print, label etc.
+        # Buyers are slower during festive peak (more SKUs in play).
+        "base_mean": 1.3,
+        "base_sigma": 0.8,
+        "festive_multiplier": 1.5,
+        "max_days": 10,
+    },
+    "factory_ncr_count": {
+        # Non-conformance reports issued against this factory in the last
+        # quarter. Poisson — higher for low-reliability and first-cycle vendors.
+        "base_lambda": 1.5,
+        "low_reliability_multiplier": 2.0,
+        "new_vendor_multiplier": 1.5,
+        "low_reliability_threshold": 0.85,
+        "max_count": 12,
+    },
+    "buyer_change_frequency": {
+        # Categorical 1 (rare) | 2 (occasional) | 3 (frequent).
+        # Some buyers are chaotic about late trims/colour changes — sampled
+        # per order to reflect the order's specific buyer-SKU combination.
+        "probabilities": {1: 0.55, 2: 0.30, 3: 0.15},
+    },
+}
+
+# How the upstream features amplify ACTUAL lead time (added days per unit).
+# Calibration note (v2 sprint 1):
+#   First pass at 0.6/0.8/0.5/0.4/1.5 pushed the overall delay rate to ~80% —
+#   the same compounding bug the v1 calibration loop hit, now in a different
+#   layer. Cut to roughly a third so the upstream signals stay predictive
+#   without doubling the delay rate.
+UPSTREAM_LEAD_TIME_AMPLIFIERS = {
+    "sampling_delay_days_factor":          0.15,
+    "fabric_arrival_delay_days_factor":    0.20,
+    "trims_confirmation_lag_days_factor":  0.12,
+    "factory_ncr_per_count":               0.10,
+    "buyer_change_per_level_above_1":      0.40,   # level 2 → +0.4d, level 3 → +0.8d
+}
+
+# How the upstream features amplify the RETURN probability.
+UPSTREAM_RETURN_MULTIPLIERS = {
+    "ncr_high_threshold":           4,
+    "ncr_high_multiplier":          1.20,
+    "trims_lag_high_threshold":     3,
+    "trims_lag_high_multiplier":    1.15,
+    "buyer_change_high_multiplier": 1.18,   # level 3 only
+}
+
+
+# =============================================================================
 # OUTPUT
 # =============================================================================
 
