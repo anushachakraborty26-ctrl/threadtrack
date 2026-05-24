@@ -1,0 +1,17 @@
+{
+  "n_orders": 5000,
+  "delay_rate_total": 45.6,
+  "return_rate_total": 32.9,
+  "delay_auc": 0.847,
+  "return_auc": 0.571,
+  "delay_band_rates": {
+    "Low": 15.0,
+    "Medium": 55.4,
+    "High": 94.5
+  },
+  "return_band_rates": {
+    "Low": 23.8,
+    "Medium": 29.3,
+    "High": 44.8
+  }
+}

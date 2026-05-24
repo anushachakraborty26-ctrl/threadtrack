@@ -13,7 +13,7 @@ Run from the project root (venv active):
 """
 
 import pandas as pd
-from google_play_scraper import reviews, Sort
+from google_play_scraper import Sort, reviews
 
 APP_ID = "co.shopney.snitch"   # Snitch — Google Play package id
 

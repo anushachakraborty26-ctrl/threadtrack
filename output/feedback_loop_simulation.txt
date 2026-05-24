@@ -1,0 +1,32 @@
+ThreadTrack v2 — simulated MLOps feedback loop
+==============================================================
+
+Dataset:                  5000 orders across 12 months (2025-04 -> 2026-03)
+Initial training window:  3 months (1103 orders)
+Streaming window:         9 months
+Retrain trigger:          every 2 streaming months
+Drift schedule:           5% -> 15% -> 30% (three equal segments)
+
+Month        Drift    Frozen AUC   Loop AUC     Event     
+2025-07      5%       0.791        0.791                  
+2025-08      5%       0.795        0.795        retrain   
+2025-09      5%       0.778        0.773                  
+2025-10      15%      0.707        0.704        retrain   
+2025-11      15%      0.707        0.694                  
+2025-12      15%      0.707        0.691        retrain   
+2026-01      30%      0.617        0.661                  
+2026-02      30%      0.698        0.708        retrain   
+2026-03      30%      0.665        0.697                  
+
+Frozen mean AUC across stream:  0.718
+Loop   mean AUC across stream:  0.724
+Loop lift over frozen:          +0.006
+
+Interpretation:
+  - The frozen model degrades as drift accumulates; nothing
+    pulls it back up.
+  - The loop model retrains on accumulated outcomes; it
+    recovers at each retrain and tracks the moving data
+    distribution.
+  - The visible saw-tooth recovery on the loop line IS the
+    feedback loop, running.

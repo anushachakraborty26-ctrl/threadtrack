@@ -265,7 +265,7 @@ def main():
 
     # The review's row number is the id we send to Claude; Claude echoes it
     # back, so we always know which answer belongs to which review.
-    rows = list(zip(todo.index.tolist(), todo["review_text"].tolist()))
+    rows = list(zip(todo.index.tolist(), todo["review_text"].tolist(), strict=False))
     batches = [rows[i:i + BATCH_SIZE] for i in range(0, len(rows), BATCH_SIZE)]
     print(f"{len(rows)} reviews split into {len(batches)} API call(s) "
           f"of up to {BATCH_SIZE} reviews each.")

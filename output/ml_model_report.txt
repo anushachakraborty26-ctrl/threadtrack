@@ -1,0 +1,38 @@
+ThreadTrack — XGBoost ML training on the v2 dataset
+============================================================
+
+Dataset:      5000 orders
+Delay rate:   45.6%
+Return rate:  32.9%
+
+XGBoost performance on the held-out 20% test set:
+  Delay  AUC: 0.847
+  Return AUC: 0.571
+
+Rule-scorer band separation (full dataset):
+  Delay  Low=15.0%  Medium=55.4%  High=94.5%
+  Return Low=23.8%  Medium=29.3%  High=44.8%
+
+Delay model — top 10 features by importance:
+  season_festive                    0.324
+  season_normal                     0.168
+  season_monsoon                    0.122
+  fabric_type_knit                  0.100
+  vendor_cluster_Tirupur            0.049
+  vendor_is_new                     0.038
+  fabric_arrival_delay_days         0.020
+  destination_tier_Tier-1           0.018
+  vendor_cluster_Ludhiana           0.018
+  vendor_cluster_Bengaluru          0.017
+
+Return model — top 10 features by importance:
+  season_festive                    0.109
+  payment_mode_COD                  0.107
+  destination_tier_Tier-3           0.070
+  vendor_cluster_Bengaluru          0.055
+  vendor_cluster_Delhi NCR          0.054
+  buyer_change_frequency            0.052
+  destination_tier_Tier-1           0.047
+  trims_confirmation_lag_days       0.044
+  vendor_reliability                0.043
+  vendor_cluster_Tirupur            0.042

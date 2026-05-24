@@ -66,7 +66,7 @@ def main():
 
     # Save scored dataset
     df.to_csv("data/scored_pos.csv", index=False)
-    print(f"\nSaved scored dataset to data/scored_pos.csv")
+    print("\nSaved scored dataset to data/scored_pos.csv")
 
 
 if __name__ == "__main__":

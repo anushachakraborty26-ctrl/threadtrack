@@ -24,11 +24,10 @@ Run:  python src/build_excel_tool.py
 import os
 
 from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.formatting.rule import CellIsRule
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
-
+from openpyxl.worksheet.datavalidation import DataValidation
 
 OUTPUT_PATH = "output/ThreadTrack_Risk_Workbook.xlsx"
 

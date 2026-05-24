@@ -33,12 +33,12 @@ HOW TO RUN  (from the project root, with the venv active)
 
 import os
 
-import pandas as pd
 import matplotlib
+import pandas as pd
+
 matplotlib.use("Agg")          # render charts straight to files, no pop-up window
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
-
 
 # ----------------------------------------------------------------------------
 # Configuration
@@ -116,7 +116,7 @@ def make_theme_chart(theme_counts, n_reviews):
 
     fig, ax = plt.subplots(figsize=(9, 5))
     bars = ax.barh(labels, values, color=colours)
-    for bar, value in zip(bars, values):
+    for bar, value in zip(bars, values, strict=False):
         ax.text(value + 0.3, bar.get_y() + bar.get_height() / 2,
                 f"{value:.1f}%", va="center", fontsize=9)
 
@@ -143,7 +143,7 @@ def make_rating_chart(by_rating):
 
     fig, ax = plt.subplots(figsize=(7, 4.5))
     bars = ax.bar(ratings, rates, color="#1565c0")
-    for bar, rate in zip(bars, rates):
+    for bar, rate in zip(bars, rates, strict=False):
         ax.text(bar.get_x() + bar.get_width() / 2, rate + 1.5,
                 f"{rate:.0f}%", ha="center", fontsize=9)
 

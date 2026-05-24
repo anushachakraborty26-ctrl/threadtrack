@@ -1,0 +1,19 @@
+ThreadTrack v2 — data-quality stress test
+==============================================================
+
+Corruption: ~30% of categorical values mistyped or blanked, plus missing numerics and qty typos.
+
+Rule scorer (static, hand-built):
+  AUC on CLEAN data:  0.801
+  AUC on MESSY data:  0.709   drop +0.092
+
+Logistic regression (the MLOps-loop argument):
+  trained on CLEAN, tested on CLEAN:  0.861
+  trained on CLEAN, tested on MESSY:  0.786   drop +0.075
+  RETRAINED on MESSY, tested on MESSY: 0.799   recovery +0.013
+
+Interpretation:
+  - A hand-built scorer cannot adapt; it silently rots under drift.
+  - ML trained on clean data degrades when reality is messy.
+  - ML retrained on the messy distribution recovers part of the gap.
+  - This is the argument for a retraining loop, not a frozen v1 model.
