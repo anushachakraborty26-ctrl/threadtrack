@@ -305,6 +305,86 @@ to a specific question a senior practitioner asked.
 
 ---
 
+---
+
+## Day 11 — The backend sketch
+
+*(25 May 2026)*
+
+A short, focused day. The senior reviewer had named "no API, no
+database, no multi-tenancy" as part of the production gap; the case
+study's Section 9 described what production would require but the
+project shipped no code to back the description. Day 11 closes that —
+at portfolio-sketch scope, not production scope.
+
+### What was done
+
+**A FastAPI service in `api/`.** Four files — `db.py` (SQLite schema
+and seeding), `models.py` (Pydantic request/response shapes), `main.py`
+(the FastAPI app with the endpoints below), and an empty `__init__.py`
+to make it a package. The endpoints:
+
+- `GET /health` — liveness
+- `POST /score` — rule scorer, no DB write
+- `POST /score-hybrid` — rule + ML blend (loads the pickled models)
+- `POST /orders` — create + score + persist
+- `GET /orders` — list with filters (cluster, season, risk band)
+- `GET /orders/{po_id}` — one order with its score and (if captured) outcome
+- `POST /orders/{po_id}/outcome` — capture the realised outcome (the
+  data that feeds production retraining)
+
+The API runs with `uvicorn api.main:app --reload --port 8000` (also
+`make api`). OpenAPI docs at `/docs`.
+
+**SQLite under the hood.** Two-table schema: `orders` (the canonical
+record plus its score) and `outcomes` (realised delays/returns, FK to
+orders). Indexed on cluster and season. Seeded on first startup from
+`data/scored_pos.csv` so the API boots with a working 5000-row dataset.
+
+**Eight API tests.** Health, score, validation rejection, create +
+read back, filter by cluster, capture outcome, 404 on unknown orders.
+All pass; the full suite is now 34 tests.
+
+### Errors and setbacks
+
+> **SQLite UNIQUE constraint failure on parallel inserts in the same
+> millisecond.** The first version generated `po_id` from
+> `int(now.timestamp())`. The list-orders test inserted two orders
+> back-to-back, both getting the same integer second, collision on the
+> primary key. Fix: append a UUID4-derived 8-character suffix to the
+> id. **The lesson:** any "unique-by-timestamp" identifier is wrong;
+> always combine timestamp with a randomness source, or use a UUID
+> outright.
+
+> **Ruff B008 — `Depends() in argument defaults`.** Bug-bear flagged
+> the standard `conn = Depends(get_db)` pattern that the FastAPI
+> tutorial still uses. The fix was not to suppress the rule but to
+> switch to the modern `Annotated[Connection, Depends(get_db)]` form —
+> same effect, no false positive, and the recommended idiom in current
+> FastAPI docs. **The lesson:** when a linter flags an "official"
+> pattern, check whether the official pattern has since moved on.
+
+A small Python-syntax bug followed from that fix. Switching to
+`Annotated` made `conn` a parameter without a default, so it had to
+come BEFORE the query parameters with defaults in `list_orders` —
+Python disallows non-default after default. Reordered the signature;
+FastAPI does not care about argument order.
+
+### What Day 11 produced
+
+A runnable REST API. Eight passing API tests, 34 in the full suite,
+ruff still clean. The Section 9 architecture sketch is no longer just
+a diagram — it now has code behind every box (the scoring layer, the
+API surface, the data layer). The README's v2 section and the case
+study's Section 12 each pick up a new bullet pointing at `api/`. The
+honest framing is preserved: this is a *sketch*. Production would swap
+SQLite for Postgres, add authentication, add per-brand tenant
+isolation, and run on managed cloud. But the scoring core —
+`src/rule_scorer.py`, `src/hybrid_scorer.py` — is unchanged, because
+it was already backend-shaped.
+
+---
+
 *This log is append-only. Each future working session adds a new day at
 the bottom. The case study at `docs/ThreadTrack_Case_Study.pdf` remains
 the polished portfolio narrative; this file is the honest journey

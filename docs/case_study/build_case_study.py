@@ -724,12 +724,19 @@ story.append(bullet(
     "flags orders where the two methods disagree by more than 25 points "
     "for human review."))
 story.append(bullet(
-    "<b>Engineering hygiene.</b> A <i>tests/</i> suite (26 pytest checks "
-    "across the rule scorer, the season calendar, the action playbook, and "
-    "the corruption simulator), <i>ruff</i> as a project-wide linter, a "
-    "<i>Makefile</i> consolidating the pipeline into single targets, and a "
-    "<i>pyproject.toml</i> declaring tooling configuration. These were the "
-    "basics v1 had skipped."))
+    "<b>A REST API sketch.</b> <i>api/</i> is a FastAPI service over SQLite "
+    "that exposes the rule scorer, the hybrid, and CRUD on orders + realised "
+    "outcomes — six endpoints, eight passing tests. It closes the Section 9 "
+    "production sketch in code: the production version swaps SQLite for "
+    "Postgres and adds auth + tenancy, but the scoring core (already pure "
+    "functions) is unchanged."))
+story.append(bullet(
+    "<b>Engineering hygiene.</b> A <i>tests/</i> suite (34 pytest checks "
+    "across the rule scorer, the season calendar, the action playbook, the "
+    "corruption simulator, and the API), <i>ruff</i> as a project-wide "
+    "linter, a <i>Makefile</i> consolidating the pipeline into single "
+    "targets, and a <i>pyproject.toml</i> declaring tooling configuration. "
+    "These were the basics v1 had skipped."))
 
 
 # ===== 13. CLOSING =====

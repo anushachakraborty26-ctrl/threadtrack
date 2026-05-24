@@ -236,3 +236,6 @@ docs/process_doc/node_modules/
 # Test-run sample from src/classify_reviews.py (regenerable; not a deliverable)
 data/classified_reviews_SAMPLE.csv
 
+# API runtime SQLite database (seeded on first run from data/scored_pos.csv)
+data/threadtrack.db
+

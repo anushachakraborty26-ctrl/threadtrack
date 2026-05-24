@@ -6,7 +6,7 @@
 PY = ./venv/bin/python
 RUFF = ./venv/bin/ruff
 
-.PHONY: help data score ml hybrid stress loop playbook test lint all clean
+.PHONY: help data score ml hybrid stress loop playbook api test lint all clean
 
 help:
 	@echo "ThreadTrack targets:"
@@ -16,6 +16,7 @@ help:
 	@echo "  make loop      — run the simulated MLOps feedback loop"
 	@echo "  make playbook  — demo the action playbook"
 	@echo "  make hybrid    — demo the rule + ML hybrid scorer"
+	@echo "  make api       — start the FastAPI service on http://localhost:8000"
 	@echo "  make test      — run pytest"
 	@echo "  make lint      — run ruff"
 	@echo "  make all       — data + ml + stress + loop + test + lint"
@@ -42,6 +43,9 @@ playbook:
 
 hybrid:
 	$(PY) -m src.hybrid_scorer
+
+api:
+	$(PY) -m uvicorn api.main:app --reload --port 8000
 
 test:
 	$(PY) -m pytest tests/ -v
