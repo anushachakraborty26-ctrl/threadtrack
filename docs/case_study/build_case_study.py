@@ -15,8 +15,15 @@ from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
 from reportlab.lib.pagesizes import LETTER
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
-from reportlab.platypus import (KeepTogether, PageBreak, Paragraph,
-                                SimpleDocTemplate, Spacer, Table, TableStyle)
+from reportlab.platypus import (
+    KeepTogether,
+    PageBreak,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+    TableStyle,
+)
 from reportlab.platypus.flowables import HRFlowable
 
 # ----------------------------------------------------------------- constants
@@ -168,8 +175,8 @@ story.append(body(
     "two working tools."))
 story.append(body(
     "The results are deliberately honest. Delivery delay predicts strongly: the "
-    "machine learning model scores an AUC of 0.855. Return risk does not — it "
-    "scores 0.578, barely above guesswork — and establishing that, rigorously, "
+    "machine learning model scores an AUC of 0.847. Return risk does not — it "
+    "scores 0.571, barely above guesswork — and establishing that, rigorously, "
     "is the single most valuable result in the project. It is not a broken "
     "model; it is a true fact about the problem, confirmed three independent "
     "ways inside the modelling and then explained, in their own words, by 1,189 "
@@ -188,19 +195,20 @@ story.append(table(
     [
         ["Synthetic dataset",
          "5,000 purchase orders, calibrated to cited industry benchmarks — "
-         "31.7% delayed, 29.4% returned"],
+         "45.6% delayed, 32.9% returned (v2 dataset with upstream features)"],
         ["Delay prediction",
-         "XGBoost AUC 0.855 — strong; delay is predictable from order-time data"],
+         "XGBoost AUC 0.847 — strong; delay is predictable from order-time data"],
         ["Return prediction",
-         "XGBoost AUC 0.578 — weak, and that is the finding"],
+         "XGBoost AUC 0.571 — weak, and that is the finding"],
         ["Rule scorer separation",
-         "Delay risk bands separate the real delay rate 9% / 50% / 92%; "
-         "return bands only 22% / 28% / 43%"],
+         "Delay risk bands separate the real delay rate 15% / 55% / 95%; "
+         "return bands only 24% / 29% / 45%"],
         ["Independent validation",
          "1,189 real Snitch customer reviews classified into six supply chain "
          "themes via the Claude API"],
         ["Delivered as",
-         "An Excel risk workbook and a four-tab interactive dashboard"],
+         "An Excel risk workbook, a four-tab interactive dashboard, a ranked "
+         "action playbook, and a callable rule + ML hybrid"],
     ],
     [128, 340]))
 story.append(PageBreak())
@@ -311,16 +319,19 @@ story.append(body(
     "is artificial in origin but realistic in shape."))
 story.append(callout(
     "Calibration is a loop, not a setting",
-    "The first dataset reported 77% of orders delayed — far higher than any "
-    "real business would survive. The cause was diagnosed: several risk factors "
-    "were being multiplied together, and multiplication compounds fast. The "
-    "settings were softened; the second version read 57%, still too high; a "
-    "single seasonal effect was found to be over-applied and corrected. The "
-    "third version read 31.7% delayed and 29.4% returned — squarely inside the "
-    "benchmark range. Three passes is not sloppiness. It is the normal rhythm "
-    "of modelling: build, measure, diagnose, correct, repeat. What matters is "
-    "that every correction was driven by a specific diagnosed cause, not a "
-    "guess."))
+    "The first calibration pass on the v1 dataset reported 77% of orders "
+    "delayed — far higher than any real business would survive. The cause was "
+    "diagnosed: several risk factors were being multiplied together, and "
+    "multiplication compounds fast. The settings were softened; the second "
+    "version read 57%, still too high; a single seasonal effect was "
+    "over-applied and corrected. The third version read 31.7% delayed and "
+    "29.4% returned — inside the benchmark range. A later v2 iteration that "
+    "added five upstream operational features ran the same three-pass loop "
+    "independently — 80% → 52% → 45.6% — producing the dataset this case "
+    "study now references. Three passes — twice — is not sloppiness. It is "
+    "the normal rhythm of modelling: build, measure, diagnose, correct, "
+    "repeat. What matters is that every correction was driven by a specific "
+    "diagnosed cause, not a guess."))
 story.append(gap(4))
 story.append(body(
     "The discipline that made this safe is a strict separation of parameters "
@@ -381,12 +392,12 @@ story.append(body(
 story.append(body("Three independent methods inside the modelling agree on it:"))
 story.append(bullet(
     "<b>Rule scorer separation.</b> Sorted into low, medium and high "
-    "delay-risk bands, orders show real delay rates of 9%, 50% and 92% — a "
-    "near-tenfold spread. The same orders sorted by return-risk band show "
-    "return rates of just 22%, 28% and 43% — barely a twofold spread."))
+    "delay-risk bands, orders show real delay rates of 15%, 55% and 95% — a "
+    "more than sixfold spread. The same orders sorted by return-risk band "
+    "show return rates of just 24%, 29% and 45% — barely a twofold spread."))
 story.append(bullet(
     "<b>Machine learning performance.</b> The delay model scores an AUC of "
-    "0.855, comfortably strong. The return model scores 0.578, barely above "
+    "0.847, comfortably strong. The return model scores 0.571, barely above "
     "the 0.5 of pure chance."))
 story.append(bullet(
     "<b>Feature-importance shape.</b> The delay model concentrates its "
@@ -656,8 +667,9 @@ story.append(bullet(
     "making deliberate interface decisions, and scoping a portfolio demo "
     "clearly against what production would require."))
 story.append(bullet(
-    "<b>Communication</b> — this case study, and a full process-documentation "
-    "logbook that records every decision and every error."))
+    "<b>Communication</b> — this case study, a README, inline rubric and "
+    "benchmark documents, plus tests, lint, and a Makefile that record "
+    "every design decision in either prose or executable form."))
 story.append(body(
     "One throughline runs through all of it. Many times in this project a "
     "choice arose between something that looked impressive and something that "
@@ -667,8 +679,61 @@ story.append(body(
     "chose the honest option, because a reader who is paying attention is far "
     "more convinced by sound judgement than by an inflated claim."))
 
-# ===== 12. CLOSING =====
-story.append(h1("12.  Closing"))
+# ===== 12. v2 — MODELLING-DEPTH ITERATION =====
+story.append(h1("12.  v2 — the modelling-depth iteration"))
+story.append(body(
+    "After v1 of this case study was first written, a senior apparel-tech "
+    "practitioner read it and gave a sharp, specific critique: predicting "
+    "the problem is not the same as solving it; upstream operational signals "
+    "drive most of real delay risk; without a feedback loop a trained model "
+    "is operationally symbolic; and the data has never seen the mess of a "
+    "real factory ERP. v2 is the response, shipped as six concrete additions."))
+story.append(bullet(
+    "<b>Upstream operational features.</b> Five signals planners actually "
+    "watch — sampling delay, fabric mill slip, trims confirmation lag, "
+    "factory NCR backlog, and buyer-change frequency — are now sampled per "
+    "order in the generator, amplify actual outcomes, and feed six new "
+    "rule-scorer factors (16–21). The model is no longer textbook features "
+    "only; it carries the signals a real planner monitors."))
+story.append(bullet(
+    "<b>A data-quality stress test.</b> <i>src/messy_data_stress_test.py</i> "
+    "corrupts the dataset the way real factory ERPs do — typos, missing "
+    "fields, distribution drift — and reports the cost in AUC. Rule scorer "
+    "drops 0.801 to 0.709; a logistic-regression baseline drops 0.861 to "
+    "0.786 and recovers to 0.799 when retrained on the messy distribution. "
+    "The recovery is the visible argument for the loop."))
+story.append(bullet(
+    "<b>A simulated MLOps feedback loop.</b> "
+    "<i>src/feedback_loop_simulation.py</i> trains a model on the first "
+    "three months of the dataset, streams the remaining nine with escalating "
+    "drift (5%, 15%, 30%), and retrains every two months. Under high drift "
+    "the loop pulls clearly ahead of a frozen model. The output chart "
+    "(<i>output/feedback_loop_simulation.png</i>) is the loop running, not "
+    "just diagrammed."))
+story.append(bullet(
+    "<b>A ranked action playbook.</b> <i>src/action_playbook.py</i> wraps "
+    "the score with specific, ranked moves a planner can act on in fifteen "
+    "seconds — escalate trims with the buyer, reserve fallback capacity at "
+    "an alternate vendor, pre-book the next fabric lot, push prepaid at "
+    "checkout. The score is the diagnosis; the playbook is the prescription."))
+story.append(bullet(
+    "<b>A callable performance-weighted hybrid.</b> v1 named a hybrid that "
+    "did not exist in runnable form. <i>src/hybrid_scorer.py</i> now loads "
+    "the trained XGBoost models and the rule scorer, returns both "
+    "components plus a 0.6 / 0.4 (delay) and 0.5 / 0.5 (return) blend, and "
+    "flags orders where the two methods disagree by more than 25 points "
+    "for human review."))
+story.append(bullet(
+    "<b>Engineering hygiene.</b> A <i>tests/</i> suite (26 pytest checks "
+    "across the rule scorer, the season calendar, the action playbook, and "
+    "the corruption simulator), <i>ruff</i> as a project-wide linter, a "
+    "<i>Makefile</i> consolidating the pipeline into single targets, and a "
+    "<i>pyproject.toml</i> declaring tooling configuration. These were the "
+    "basics v1 had skipped."))
+
+
+# ===== 13. CLOSING =====
+story.append(h1("13.  Closing"))
 story.append(body(
     "ThreadTrack takes a supply chain problem that brands normally meet "
     "reactively — delivery delays and returns — and turns it into something "
@@ -677,12 +742,13 @@ story.append(body(
     "that prediction reaches: delays can be foreseen, returns largely cannot, "
     "and the project proves both rather than asserting them."))
 story.append(body(
-    "The system is built and validated; two of the three Phase 6 deliverables "
-    "— the Excel workbook and the interactive dashboard — are complete. "
-    "Putting the dashboard online for public access, and the continued "
-    "refinement of its interface, are the remaining steps. The foundation, and "
-    "the thinking behind it, are documented here and in the project's full "
-    "process logbook."))
+    "The system is built and validated. The portfolio v1 ships three "
+    "deliverables — the Excel workbook, the interactive dashboard, and this "
+    "case study — and the v2 iteration of Section 12 has added the modelling-"
+    "depth changes a senior practitioner asked for. Putting the dashboard "
+    "online for public access, and the continued refinement of its "
+    "interface, are the remaining steps. The foundation, and the thinking "
+    "behind it, are documented here, in the README, and in the source itself."))
 story.append(gap(10))
 story.append(HRFlowable(width=CONTENT_W, thickness=0.5, color=GRID,
                         spaceBefore=2, spaceAfter=10))

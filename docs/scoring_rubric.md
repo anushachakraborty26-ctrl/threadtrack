@@ -58,29 +58,42 @@ After all 14 factors, a final rule feeds the **predicted delay score** into the 
 
 **Why this is legitimate (not leakage):** the scorer cannot use the *actual* delay outcome — but it just *computed* `delay_score`, a prediction available at order time. Delayed orders return ~1.4x more (the delay → return causal link, confirmed in EDA). Factor 15 captures that pathway using the prediction, not the outcome.
 
+## v2 — upstream operational factors (16–21)
+
+v2 added five operational signals planners actually watch day to day. Each is sampled per order in the generator and amplifies the actual lead time and return probability, so the data carries genuine predictive signal. These factors are **backward-compatible** — they only fire when the new keys are present, so v1 rows continue to score the v1 way.
+
+| # | Factor | Condition | Delay pts | Return pts | Reasoning |
+|---|---|---|---|---|---|
+| 16 | Sampling delay 3+ days | `sampling_delay_days >= 3` | +6 | 0 | Sampling slippage pushes production back |
+| 17 | Fabric mill late 5+ days | `fabric_arrival_delay_days >= 5` | +8 | 0 | Cut/sew cannot start until fabric is in |
+| 18 | Trims confirmation lag 3+ days | `trims_confirmation_lag_days >= 3` | +5 | +6 | Buyer-side bottleneck; late changes raise quality risk |
+| 19 | Factory NCR backlog (4+) | `factory_ncr_count >= 4` | +3 | +14 | Recent non-conformances signal elevated quality risk |
+| 20 | Buyer changes frequent (level 3) | `buyer_change_frequency == 3` | +6 | +10 | Late-stage rework hits both delay and quality |
+| 21 | Sampling delay + first-cycle vendor | `sampling_delay_days >= 3` AND `vendor_is_new` | +6 | 0 | Compounding new-vendor slip |
+
 ## Validation results
 
-Applied to all 5,000 synthetic orders (`src/apply_scorer.py`):
+Applied to all 5,000 synthetic orders on the **v2 dataset** (`src/apply_scorer.py`):
 
 **Delay scorer — strong discrimination:**
 
 | Predicted band | Actual delay rate |
 |---|---|
-| Low (0-35) | 9.3% |
-| Medium (35-65) | 50.0% |
-| High (65-100) | 91.9% |
+| Low (0-35) | 15.0% |
+| Medium (35-65) | 55.4% |
+| High (65-100) | 94.5% |
 
-A 10x spread from Low to High. When the scorer flags an order High, it actually delays 92% of the time.
+A 6.3× spread from Low to High. When the scorer flags an order High, it actually delays 95% of the time.
 
 **Return scorer — directional discrimination:**
 
 | Predicted band | Actual return rate |
 |---|---|
-| Low (0-35) | 22.3% |
-| Medium (35-65) | 28.3% |
-| High (65-100) | 43.5% |
+| Low (0-35) | 23.8% |
+| Medium (35-65) | 29.3% |
+| High (65-100) | 44.8% |
 
-A 2x spread — monotonic and useful, but softer than delay.
+A 1.9× spread — monotonic and useful, but softer than delay.
 
 ## Honest limitations
 
@@ -100,4 +113,4 @@ The rule scorer is tier one of two. In Phase 4, an XGBoost classifier learns fro
 
 ---
 
-*Rubric v1 designed and validated 2026-05-20. Weights live in `src/rule_scorer.py`; full benchmark citations in `docs/benchmarks.md`.*
+*Rubric v1 designed and validated 2026-05-20; v2 factors 16–21 added 2026-05-24. Weights live in `src/rule_scorer.py`; full benchmark citations in `docs/benchmarks.md`.*

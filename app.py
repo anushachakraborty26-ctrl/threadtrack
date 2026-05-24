@@ -18,6 +18,7 @@ from datetime import date
 import pandas as pd
 import streamlit as st
 
+from src.action_playbook import recommend_actions
 from src.config import FESTIVE_MONTHS, REGIONAL_MONSOON_MONTHS, VENDORS
 from src.rule_scorer import score_order
 
@@ -76,7 +77,7 @@ def load_orders():
 def load_city_tiers():
     """Load the city -> delivery-tier classification (used by the new-order form)."""
     cities = pd.read_csv(CITY_TIERS_CSV)
-    return dict(zip(cities["city"], cities["tier"]))
+    return dict(zip(cities["city"], cities["tier"], strict=False))
 
 
 def band_of(score):
@@ -152,17 +153,45 @@ def render_result(result):
 
 
 def order_from_row(row):
-    """Build a score_order() input dict from a dataset row."""
+    """Build a score_order() input dict from a dataset row — NaN-safe so it
+    works on both v1 rows (no upstream features) and v2 rows (all features
+    present), and on session-added rows that may be missing columns."""
+    def safe(key, default):
+        if key not in row.index:
+            return default
+        v = row[key]
+        return default if pd.isna(v) else v
+
     return {
-        "vendor_is_new": bool(row["vendor_is_new"]),
-        "vendor_cluster": row["vendor_cluster"],
-        "vendor_reliability": float(row["vendor_reliability"]),
-        "fabric_type": row["fabric_type"],
-        "order_qty": int(row["order_qty"]),
-        "destination_tier": row["destination_tier"],
-        "payment_mode": row["payment_mode"],
-        "season": row["season"],
+        "vendor_id":          safe("vendor_id", ""),
+        "vendor_is_new":      bool(safe("vendor_is_new", False)),
+        "vendor_cluster":     safe("vendor_cluster", ""),
+        "vendor_reliability": float(safe("vendor_reliability", 1.0)),
+        "fabric_type":        safe("fabric_type", ""),
+        "order_qty":          int(safe("order_qty", 0)),
+        "destination_city":   safe("destination_city", ""),
+        "destination_tier":   safe("destination_tier", ""),
+        "payment_mode":       safe("payment_mode", ""),
+        "season":             safe("season", ""),
+        # v2 upstream features — default to best-case when absent
+        "sampling_delay_days":         float(safe("sampling_delay_days", 0)),
+        "fabric_arrival_delay_days":   float(safe("fabric_arrival_delay_days", 0)),
+        "trims_confirmation_lag_days": float(safe("trims_confirmation_lag_days", 0)),
+        "factory_ncr_count":           int(safe("factory_ncr_count", 0)),
+        "buyer_change_frequency":      int(safe("buyer_change_frequency", 1)),
     }
+
+
+def render_actions(order, result):
+    """Show the ranked action playbook for an order — the v2 prescription
+    layer that pairs with the score."""
+    actions = recommend_actions(order, result)
+    if not actions:
+        return
+    st.markdown("**Recommended actions** — ranked, planner-actionable in 15 seconds")
+    for i, a in enumerate(actions, 1):
+        st.markdown(f"**{i}.  {a['action']}**")
+        st.caption(f"target: {a['target']}  ·  expected impact: {a['expected_impact']}")
 
 
 # ----------------------------------------------------------------------------
@@ -250,7 +279,11 @@ with tab_book:
     if len(view) > 0:
         picked = st.selectbox("Choose a PO", view["po_id"].tolist())
         row = view[view["po_id"] == picked].iloc[0]
-        render_result(score_order(order_from_row(row)))
+        order = order_from_row(row)
+        result = score_order(order)
+        render_result(result)
+        st.divider()
+        render_actions(order, result)
     else:
         st.write("No orders match the current filters.")
 
@@ -353,6 +386,9 @@ with tab_score:
             f"{o['order_qty']:,} pcs · {o['payment_mode']} · {pending['place']} · "
             f"{pending['po_date']}, {o['season']} season")
         render_result(pending["result"])
+
+        st.divider()
+        render_actions(pending["order"], pending["result"])
 
         st.divider()
         st.markdown("**Place this order?**")
